@@ -22,18 +22,39 @@ function freeze_params!(model, ps, data::Tuple)
     return nothing
 end
 
-function Vypis(ps, gs)
-    printstyled("Parametry modelu: \n"; color = :green)
-    println(ps) 
-    printstyled("Hodnota ztrátové funkce "; color = :green)
+#Vypis pro NaiveNPU/Dense Chains
+function Vypis1(ps, gs)
+    printstyled("Parametry modelu: \n"; color = :yellow)
+    println()
+    for i = 1:length(model)
+        if isequal(typeof(model[i]),NaiveNPU{Matrix{Float32}})
+         printstyled("Wr: "; color = :cyan)
+         println(ps[2*i-1]) 
+         printstyled("Wi: "; color = :cyan)
+         println(ps[2*i]) 
+        else
+         printstyled("A: "; color = :cyan)
+         println(ps[2*i-1]) 
+         printstyled("b: "; color = :cyan)
+         println(ps[2*i])
+        end
+    end
+     println()
+    printstyled("Hodnota ztrátové funkce "; color = :blue)
     println(LL[end])
-    printstyled("|Grad Wr|: "; color = :green)
-    println(norm(gs[ps[1]])) 
-    printstyled("|Grad Wi|: "; color = :green)
-    println(norm(gs[ps[2]])) 
-    printstyled("|Grad A|: "; color = :green)
-    println(norm(gs[ps[3]])) 
-    printstyled("|Grad b|: "; color = :green)
-    println(norm(gs[ps[4]]))
+    println()
+    for i = 1:length(model)
+       if isequal(typeof(model[i]),NaiveNPU{Matrix{Float32}})
+        printstyled("|Grad Wr|: "; color = :green)
+        println(norm(gs[ps[2*i-1]])) 
+        printstyled("|Grad Wi|: "; color = :green)
+        println(norm(gs[ps[2*i]])) 
+       else
+        printstyled("|Grad A|: "; color = :green)
+        println(norm(gs[ps[2*i-1]])) 
+        printstyled("|Grad b|: "; color = :green)
+        println(norm(gs[ps[2*i]]))
+       end
+    end
     return nothing
 end
