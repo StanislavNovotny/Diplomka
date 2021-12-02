@@ -59,6 +59,7 @@ ps = params(model)
 """
     Iterace
 """
+
 for i=1:max_iter
     LL[i] = loss(X,Y,λ)
     gs = gradient(()->loss(X,Y,λ),ps)
@@ -78,10 +79,14 @@ Vypis parametru
 """
     Vykresleni
 """
-y = model(X)
+x = Matrix(T.(-100.0:321.0)'.-103)/100 
+y = model(x)
 
-scatter(X[:],Y[:],markersize = 1,label="Label")
-plot!(X[:],y[:],label="Predikce")
+scatter(X[:],Y[:],markersize = 1.1,label="Label",
+xlims = (-2,2),ylims = (-110,110))
+pl = plot!(x[:],y[:],label="Predikce")
+
+savefig(pl,"DipolBP1D-NN")
 
 plot(LL, label="Loss function")
 plot(log.(LL), label="Log of Loss function")
