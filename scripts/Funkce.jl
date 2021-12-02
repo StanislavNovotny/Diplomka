@@ -58,3 +58,36 @@ function Vypis1(ps, gs)
     end
     return nothing
 end
+
+extract_parameters(ps) = vcat([reshape(p, :, 1)
+for p in ps]...)
+
+
+function evaluate_solution(ps, gs; ϵ=0.025)
+
+    p = extract_parameters(ps)
+
+    if any(isnan.(p))
+
+        return NaN
+
+    elseif norm(gs[ps[1]]) >= ϵ || norm(gs[ps[3]]) >= ϵ || norm(gs[ps[4]]) >= ϵ
+
+        return -1
+
+    elseif abs(p[1] - 2) < ϵ && abs(p[3] - 2) < ϵ && abs(p[4]) < ϵ
+
+        return 0
+
+
+    elseif abs(p[3]) < ϵ && abs(p[4] - 2/3) < ϵ 
+
+        return 1
+
+    else
+
+        return 2
+
+    end
+
+end
