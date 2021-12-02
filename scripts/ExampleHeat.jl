@@ -49,25 +49,17 @@ for i=1:length(r)
         ps = params(model)
         [init_params!(model, data) for data in tmp]
         [freeze_params!(model, ps, data) for data in frz]
-        for k=1:5200
+        for k=1:4350
             gs = gradient(()->loss(X,Y,λ),ps)
             Flux.Optimise.update!(opt, ps, gs)
         end
         ps = params(model)
         gs = gradient(()->loss(X,Y,λ),ps)
-        if (norm(gs[ps[1]]) + norm(gs[ps[3]]) + norm(gs[ps[4]])) >= 0.025
-            z[i,j] = 0
-        elseif abs(ps[1][1] - 2) < 0.025 && abs(ps[3][1] - 2) < 0.025 && abs(ps[4][1]) < 0.025
-            z[i,j] = -1
-        elseif abs(ps[1][1]) < 0.025 && abs(ps[3][1]) < 0.025 && abs(ps[4][1] - 0.66) < 0.025
-            z[i,j] = 1
-        else z[i,j] = NaN
-        end
+        z[i,j] = evaluate_solution(ps, gs; ϵ=0.025)
     end
 end
 
-Vysledek1 = z
-save("b0.jld", "b0", Vysledek1)
+save("b0final.jld", "b0final", z)
 
 q = zeros(length(r),length(a))
 
@@ -78,30 +70,23 @@ for i=1:length(r)
         ps = params(model)
         [init_params!(model, data) for data in tmp]
         [freeze_params!(model, ps, data) for data in frz]
-        for k=1:5200
+        for k=1:4350
             gs = gradient(()->loss(X,Y,λ),ps)
             Flux.Optimise.update!(opt, ps, gs)
         end
         ps = params(model)
         gs = gradient(()->loss(X,Y,λ),ps)
-        if (norm(gs[ps[1]]) + norm(gs[ps[3]]) + norm(gs[ps[4]])) >= 0.025
-            z[i,j] = 0
-        elseif abs(ps[1][1] - 2) < 0.025 && abs(ps[3][1] - 2) < 0.025 && abs(ps[4][1]) < 0.025
-            z[i,j] = -1
-        elseif abs(ps[1][1]) < 0.025 && abs(ps[3][1]) < 0.025 && abs(ps[4][1] - 0.66) < 0.025
-            z[i,j] = 1
-        else z[i,j] = NaN
-        end
+        q[i,j] = evaluate_solution(ps, gs; ϵ=0.025)
     end
 end
 
-Vysledek2 = q
-save("b666.jld", "b666", Vysledek2)
+
+save("b666final.jld", "b666final", q)
 
 
 fig1 = heatmap(r,a, q,
-    c=cgrad([:green, :red,]),
-    xlabel="Wr", ylabel="A",
+    c=cgrad([:yellow,:green, :red, :white]),
+    xlabel="W^r", ylabel="A",
     title="Konvergence pro b = 2/3",
     xlims = (-1.1,3.1),
     ylims = (-1.1,3.1),
@@ -112,11 +97,13 @@ fig1 = heatmap(r,a, q,
 )
 
 
-savefig(fig1,"b23conv")
+savefig(fig1,"FFinalb23conv")
 
+
+z = load("C:/Users/stany/b0final.jld", "b0final")
 fig2 = heatmap(r,a, z,
-c=cgrad([:green, :red,]),
-xlabel="Wr", ylabel="A",
+c=cgrad([:yellow,:green, :red, :white]),
+xlabel="W^r", ylabel="A",
 title="Konvergence pro b = 0",
 xlims = (-1.1,3.1),
 ylims = (-1.1,3.1),
@@ -126,4 +113,4 @@ colorbar=false,
 minorticks = 10
 )
 
-savefig(fig2,"b0conv")
+savefig(fig2,"FFFinalb0conv")
