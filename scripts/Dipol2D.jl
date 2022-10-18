@@ -24,7 +24,7 @@ sqnorm(x) = sum(abs, x)
 w_X = 1 ./(1 .+ abs.(X))
 w_X_sum = sum(w_X)
 
-max_iter = 11000
+max_iter = 20000
 
 λ = 0
 
@@ -33,7 +33,7 @@ model = Chain(NaiveNPU(1,5),Dense(5,440,identity), NaiveNPU(440,220))
 
 loss(x,y,λ) = sum(w_X.*(model(x) - y).^2) / w_X_sum + λ*sum(sqnorm, ps)
 
-η = 0.004
+η = 0.007
 opt = ADAM(η)
 LL = zeros(max_iter)
 
@@ -41,10 +41,23 @@ LL = zeros(max_iter)
 Wr1 = T.([1;1;2;3;4])
 Wi1 = T.(zeros(5,1))
 
-Wr2 = 
+A = (Flux.params(model[2]))[1]
+for i=1:220
+    A[2*i,1] = 0
+    A[2*i-1,2] = 0
+    A[2*i-1,3] = 0
+    A[2*i-1,4] = 0
+    A[2*i-1,5] = 0
+end
+
+Wr2 = T.(zeros(220,440))
+for i=1:220
+    Wr2[i,2*i-1] = 1
+    Wr2[i,2*i] = -3
+end
 Wi2 = T.(zeros(220,440))
 
-init = [(1,1,Wr1),(1,2,Wi1),(3,2,Wi2)]
+init = [(1,1,Wr1),(1,2,Wi1),(2,1,A),(3,1,Wr2),(3,2,Wi2)]
 frz = [(1,2),(3,2)]
 
 ps = Flux.params(model)
@@ -53,8 +66,6 @@ ps = Flux.params(model)
 [freeze_params!(model, ps, data) for data in frz]
 
 #Iterace
-
-ps = Flux.params(model)
 
 @time begin
     for i=1:max_iter
