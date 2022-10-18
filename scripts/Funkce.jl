@@ -26,6 +26,7 @@ end
 function Vypis1(ps, gs)
     printstyled("Parametry modelu: \n"; color = :yellow)
     println()
+    #=
     for i = 1:length(model)
         if isequal(typeof(model[i]),NaiveNPU{Matrix{Float32}})
          printstyled("Wr: "; color = :cyan)
@@ -40,6 +41,7 @@ function Vypis1(ps, gs)
         end
     end
      println()
+    =#
     printstyled("Hodnota ztrátové funkce "; color = :blue)
     println(LL[end])
     println()
